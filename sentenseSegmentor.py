@@ -2,7 +2,24 @@ import pickle
 import nltk
 
 """
-This module 
+This module segments the data input to the 
+following formats:
+  1. 
+  [
+    [ (tag1, sentense1), (tag2, sentense2), ...]
+    [ (tag1, sentense1), (tag2, sentense2), ...]
+    ...
+  ]
+  
+  2.
+  [sentense1, sentense2, sentense3, ...]
+
+  They are stored in file 'dataset' and 'allSent'
+
+  Example:
+  >> import pickle
+  >> a = pickle.loads(open('dataset', 'r').read())
+
 """
 def read():
   return pickle.loads(open('extract_data/review_quotes', 'r').read())
