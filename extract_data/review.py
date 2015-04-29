@@ -3,6 +3,7 @@ import urllib2
 import unicodedata
 import movieLinkQuoteInventory as MI
 import pickle
+import nltk
 
 def get_flicks_blog_review(review_url):
     url = review_url
@@ -41,6 +42,29 @@ def get_moviechambers_review(review_url):
     review = review.get_text()
     return review
 
+def initial_clean(review, delete_first=False, delete_last=False, Grade=False):
+    if Grade:
+        index = review.index('Grade')
+        review = review[:index]
+
+    if delete_first or delete_last:
+
+        review = nltk.sent_tokenize(review)
+        
+        if delete_first:
+            review = review[1:]
+        if delete_last:
+            review = review[:-1]
+        
+        cleaned = u''
+        for c in review:
+            cleaned += c
+    
+    else:
+        cleaned = review
+
+    return cleaned
+
 def to_file(review, filename):
 
     review = unicodedata.normalize('NFKD',review).encode('ascii','ignore')
@@ -57,18 +81,33 @@ if __name__ == '__main__':
         quote = movie_dict[i]['quote']
         try:
             if "www.film4.com" in link:
-                review = get_film4_review(link)
+                pass
             elif "www.flicks.co.nz" in link:
                 review = get_flicks_blog_review(link)
+                review = initial_clean(review, 
+                                       delete_first=False,
+                                       delete_last=True,
+                                       Grade=False)
+
             elif "www.moviechambers.com" in link:
                 review = get_moviechambers_review(link)
+                review = initial_clean(review,
+                                       delete_first=True,
+                                       delete_last=False,
+                                       Grade=True)
             else:
                 review = get_macleans_review(link)
+                review = initial_clean(review,
+                                       delete_first=True,
+                                       delete_last=True,
+                                       Grade=False)
+
             review_quote_list.append({"quote":quote,"review":review})
 
         except:
             pass
-    pickle.dump(review_quote_list, open("review_quotes","w"))
+
+    pickle.dump(review_quote_list, open("review_quotes2","w"))
 
 
 
