@@ -58,7 +58,7 @@ def initial_clean(review, delete_first=False, delete_last=False, Grade=False):
         
         cleaned = u''
         for c in review:
-            cleaned += c
+            cleaned = cleaned + u' ' + c
     
     else:
         cleaned = review
