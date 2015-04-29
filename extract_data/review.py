@@ -80,14 +80,22 @@ if __name__ == '__main__':
         link = movie_dict[i]['link']
         quote = movie_dict[i]['quote']
         try:
-            if "www.film4.com" in link:
-                pass
+            if "www.macleans.ca" in link:
+                review = get_macleans_review(link)
+                review = initial_clean(review,
+                                       delete_first=True,
+                                       delete_last=True,
+                                       Grade=False)
+                
+                review_quote_list.append({"quote":quote,"review":review})
             elif "www.flicks.co.nz" in link:
                 review = get_flicks_blog_review(link)
                 review = initial_clean(review, 
                                        delete_first=False,
                                        delete_last=True,
                                        Grade=False)
+                
+                review_quote_list.append({"quote":quote,"review":review})
 
             elif "www.moviechambers.com" in link:
                 review = get_moviechambers_review(link)
@@ -95,14 +103,10 @@ if __name__ == '__main__':
                                        delete_first=True,
                                        delete_last=False,
                                        Grade=True)
+                
+                review_quote_list.append({"quote":quote,"review":review})
             else:
-                review = get_macleans_review(link)
-                review = initial_clean(review,
-                                       delete_first=True,
-                                       delete_last=True,
-                                       Grade=False)
-
-            review_quote_list.append({"quote":quote,"review":review})
+                pass
 
         except:
             pass
