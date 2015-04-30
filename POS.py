@@ -42,22 +42,32 @@ def clean_texts(data, stopwords):
 	RE = RegexpTokenizer('[^a-z]', gaps=True)
 
 	cleanData = []
-	
+
+	for d in data:
+		for item in d:
+			sent = item[1].lower()
+			cleanData.append( TreebankWordTokenizer().tokenize(sent) )
+
+	#print cleanData
+
+
+	"""	
 	for d in data:
 		for s in d:
 			cleanData.append( list(set(RE.tokenize(s[1].lower())) - stopwords) )
-
+	"""
 	return cleanData
 
 def parse_tagset():
 
-	tagset = []
+	tagset = ["$", "\'\'", "``", "(", ")", ",", "--", ".", ":"]
 
-	with open("tagset.txt") as data:
+	with open("pos/tagset.txt") as data:
 		for d in data:
 			tagset.append(d.split()[1])
 
-	pickle.dump(tagset, open("POStagset", "w"))
+	pickle.dump(tagset, open("pos/POStagset", "w"))
+
 
 def gen_POSngram_lexicon(tagsetFile):
 
@@ -102,10 +112,14 @@ def gen_POS_ngram_corpus(posLex, docs):
 		for item in pos_tag(doc):
 			posDocs[-1].append(item[1])
 
+		#print doc
+		#print posDocs[-1]
+	
 	#Generate POS Ngram documents
 	for posDoc in posDocs:
 		posNgramDocs.append([])
 
+		#Up to trigram
 		for n in range(1, 4):
 			posNgram = ngrams(posDoc, n)
 			
@@ -124,6 +138,7 @@ def gen_POS_ngram_corpus(posLex, docs):
 		for item in sample:
 			matrix[i][item[0]] = item[1]
 		i += 1
+
 
 	print sparse.csr_matrix(matrix)
 
