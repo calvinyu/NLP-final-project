@@ -42,6 +42,35 @@ def get_moviechambers_review(review_url):
     review = review.get_text()
     return review
 
+def get_urbancinefile_review(review_url):
+    url = review_url
+    page = urllib2.urlopen(url)
+    soup = BeautifulSoup(page.read())
+    review = soup.find_all('font',class_='articleBody')
+    review = review[0]
+    review = review.get_text()
+    review = review.split(":",2)[1]
+    return review
+
+def get_sky_review(review_url):
+    url = review_url
+    page = urllib2.urlopen(url)
+    soup = BeautifulSoup(page.read())
+    review = soup.find_all('div',class_='review')
+    review = review[0]
+    review = review.get_text()
+    review = review[::-1].split(".",1)[1][::-1]
+    return review
+
+def get_vueweekly_review(review_url):
+    url = review_url
+    page = urllib2.urlopen(url)
+    soup = BeautifulSoup(page.read())
+    review = soup.find_all('div',class_='entry-content')
+    review = review[0]
+    review = review.get_text()
+    return review
+
 def initial_clean(review, delete_first=False, delete_last=False, Grade=False):
     if Grade:
         index = review.index('Grade')
@@ -65,20 +94,18 @@ def initial_clean(review, delete_first=False, delete_last=False, Grade=False):
 
     return cleaned
 
-def to_file(review, filename):
-
-    review = unicodedata.normalize('NFKD',review).encode('ascii','ignore')
-
-    with open(filename, 'w') as out_file:
-        out_file.write("%s" % review)
 
 if __name__ == '__main__':
 
     movie_dict = MI.getLinkQuote()
     review_quote_list = []
+    print "Links generated!"
+    k = 1
     for i in range(len(movie_dict)):
         link = movie_dict[i]['link']
         quote = movie_dict[i]['quote']
+        k += 1
+        print k
         try:
             if "www.macleans.ca" in link:
                 review = get_macleans_review(link)
@@ -105,13 +132,30 @@ if __name__ == '__main__':
                                        Grade=True)
                 
                 review_quote_list.append({"quote":quote,"review":review})
+            
+            elif "www.urbancinefile.com.au" in link:
+                review = get_urbancinefile_review(link)
+                review_quote_list.append({"quote":quote,"review":review})
+
+            elif "http://skymovies.sky.com" in link:
+                review = get_sky_review(link)
+                review_quote_list.append({"quote":quote,"review":review})
+
+            elif "www.vueweekly.com" in link:
+                review = get_vueweekly_review(link)
+                review = initial_clean(review, 
+                                       delete_first=False,
+                                       delete_last=True,
+                                       Grade=False)
+                
+                review_quote_list.append({"quote":quote,"review":review})
             else:
                 pass
 
         except:
             pass
 
-    pickle.dump(review_quote_list, open("review_quotes2","w"))
+    pickle.dump(review_quote_list, open("review_quotes3","w"))
 
 
 

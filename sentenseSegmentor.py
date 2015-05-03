@@ -22,7 +22,7 @@ following formats:
 
 """
 def read():
-  return pickle.loads(open('extract_data/review_quotes', 'r').read())
+  return pickle.loads(open('extract_data/review_quotes3', 'r').read())
 def segment(raw):
   sents = nltk.sent_tokenize(raw)
   return sents
@@ -49,17 +49,23 @@ if __name__ == "__main__":
     r = r.replace(u'\u201d', u'"')
     q = rq['quote']
     sents = segment(r)
+    summary = False
     doc = []
     i += 1
     cc = 0
     for sent in sents:
-      allSentence.append(sent)
-      if match(sent, q):
-        cnt += 1
-        doc.append((1, sent))
-      else:
-        doc.append((0, sent))
-    documents.append(doc)
+        if match(sent, q):
+            summary = True
+    if summary:
+        for sent in sents:
+            allSentence.append(sent)
+            if match(sent, q):
+                cnt += 1
+                doc.append((1, sent))
+            else:
+                doc.append((0, sent))
+        documents.append(doc)
+
   print cnt, len(rqPairs)
-  pickle.dump(documents, open('dataset', 'w'))
-  pickle.dump(allSentence, open('allSent', 'w'))
+  pickle.dump(documents, open('dataset3', 'w'))
+  pickle.dump(allSentence, open('allSent3', 'w'))
