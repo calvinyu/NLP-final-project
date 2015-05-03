@@ -39,7 +39,7 @@ def read_data(filename):
 
 def clean_texts(data, stopwords):
 
-	RE = RegexpTokenizer('[^a-z]', gaps=True)
+	#RE = RegexpTokenizer('[^a-z]', gaps=True)
 
 	cleanData = []
 
@@ -138,7 +138,6 @@ def gen_POS_ngram_corpus(posLex, docs):
 		for item in sample:
 			matrix[i][item[0]] = item[1]
 		i += 1
-
 
 	print sparse.csr_matrix(matrix)
 

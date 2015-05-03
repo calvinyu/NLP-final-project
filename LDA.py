@@ -34,24 +34,42 @@ def read_data(filename):
 	return pickle.load(open(filename, "r"))
 
 
+def remove_stopwords(doc, stopwords):
+	newDoc = []
+	for w in doc:
+		if w not in stopwords:
+			newDoc.append(w)
+	return newDoc
+
 def clean_texts(data, stopwords):
 
-	RE = RegexpTokenizer('[^a-z]', gaps=True)
+	reTok = RegexpTokenizer('[^a-z]', gaps=True)
+
+	treebanTok = TreebankWordTokenizer()
 
 	cleanData = []
 	
 	for d in data:
+		cleanData.append([])
 		for s in d:
-			cleanData.append( list(set(RE.tokenize(s[1].lower())) - stopwords) )
+			cleanData[-1].append( remove_stopwords(reTok.tokenize(s[1].lower()), stopwords) ) 
 
 	return cleanData
 
-def topic_model(texts, n_topic):
+def topic_model(dictionary, texts, n_topic):
 	#Build the dictionary given the list of words
-	dictionary = corpora.Dictionary(texts)
+	#dictionary = corpora.Dictionary(texts)
+	
+	#Group all words in the doc
+	groupedTexts = []
+	for doc in texts:
+		groupedTexts.append([])
+		for sent in doc:
+			groupedTexts[-1] += sent
+
 	
 	#Build the coupus given list of words
-	corpus = [dictionary.doc2bow(t) for t in texts]
+	corpus = [dictionary.doc2bow(t) for t in groupedTexts]
 
 	#Compute the TFIDF
 	print "Extracting TFIDF..."
@@ -62,7 +80,27 @@ def topic_model(texts, n_topic):
 	print "LDA Training..."
 	lda = models.LdaModel(corpus_tfidf, id2word=dictionary, num_topics=n_topic)
 
-	n_words = 15
+	#Compute the topic prob for whole doc and single sent
+	matrix = []
+	for i in range(len(texts)):
+		for j in range(len(texts[i])):
+			docTopicProb = [0 for k in range(n_topic)]
+			sentTopicProb = [0 for k in range(n_topic)]
+	
+			#Topic prob for doc	
+			for item in lda[corpus[i]]:
+				docTopicProb[item[0]] = item[1]
+	
+			#Topic prob for sent
+			for item in lda[dictionary.doc2bow(texts[i][j])]:
+				sentTopicProb[item[0]] = item[1]
+			
+			matrix += [docTopicProb+sentTopicProb]
+			
+	print sparse.csr_matrix(matrix)
+
+	"""
+	n_words = 100
 
 	keyterms = []
 
@@ -72,31 +110,42 @@ def topic_model(texts, n_topic):
 		keyterms.append([])
 		for term in temp:
 			keyterms[-1].append( term[1])
-		print keyterms[-1]
-
-
-
+	
+	return keyterms
+	"""
 	#lda.save("LDA.model")
+
 
 def main():
 
 	dataFile = "dataset2"
 	stopwordsFile = "stopwords/english.txt"
+	lexFile = "lex/toy.lex"
 
 	data = read_data(dataFile)
+	lex = read_data(lexFile)
 	stopwords = init_stopwords(stopwordsFile)
 
-	texts = clean_texts(data, set(stopwords))
+	"""
+	i = 0
+	for d in data:
+		for sent in d:
+			if sent[0] == 1:
+				print sent, i
+				i += 1
+	"""
 
-	
+	texts = clean_texts(data, stopwords)
+
+	"""
 	for t in texts:
 		for i in t:
 			if "facebooktwitterlinkedingoogleemailprint" == i:
 				print t
+	"""
 
-	print texts
+	keyterms = topic_model(lex, texts, 20)
 
-	topic_model(texts, 30)
 
 
 if __name__ == "__main__":
